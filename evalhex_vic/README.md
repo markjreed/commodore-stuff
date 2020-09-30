@@ -11,7 +11,7 @@ integer to floating-point treats the integer as signed instead of unsigned.  If 
 ran the original port and then tried to set the screen colors with something
 like `POKE $900F, 8` it would be read as `POKE -28657, 8` and generate an
 `?ILLEGAL QUANTITY ERROR`! So I added a check of the sign bit and a call
-to the floating point add routine with a constant 65536.0 whenever hte
+to the floating point add routine with a constant 65536.0 whenever the
 result was negative. Now it works the same on the VIC as on the 64.
 
 Files:
