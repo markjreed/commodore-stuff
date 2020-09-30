@@ -22,7 +22,7 @@ Files:
 | [evalhex.seq](evalhex.seq)        | The same, but in PETSCII format
 | [evalhex.bin](evalhex.bin)        | Compiled binary built from the above; loads directly into the cassette buffer via `LOAD,8,1`
 | [evalhex\_poker.p00](evalhex.p00) | A BASIC program that POKEs the routine into memory and then calls it.
-| [evalhex.d64](evalhex.d64)        | Diskette image with all of the above files
+| [evalhex.d64](evalhex.d64)        | Diskette image with all the above files
 | [evalhex\_poker.bas](evalhex_poker.bas) | ASCII source for the above BASIC program
 | [makepoker.sh](makepoker.sh)       | A script to generate the ASCII BASIC from the compiled binary
 
