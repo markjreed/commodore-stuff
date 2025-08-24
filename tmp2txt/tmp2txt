@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# convert Turbo Macro Pro source code into plain text
+#
+usage() {
+    local rc=$1
+    local fd=$(( $1 ? 2 : 1 ))
+    printf >&$fd 'Usage: %s diskimage.d64 filename [...]\n' "$0"
+    printf >&$fd '     Run without filename to see list of files on image.\n'
+    printf >&$fd '     Disk image must also contain Turbo Macro Pro.\n'
+    exit $rc
+}
+
+main() {
+    if (( !$# )); then
+        usage 1
+    fi
+    local image=$1
+    if [[ ! -r "$image" ]]; then
+        die "$image: no such disk image."
+    fi
+    shift
+    if (( ! $# )); then
+        c1541 "$image" -dir | awk '$NF == "prg"'
+        exit 0
+    fi
+    local file temp=$(mktemp -d)
+    trap "rm -rf '$temp'" EXIT
+    local write_clipboard
+
+    if type pbcopy >&/dev/null; then
+        write_clipboard=(pbcopy)
+    elif type wl-copy >&/dev/null; then
+        write_clipboard=(wl-copy)
+    elif type xsel >&/dev/null; then
+        write_clipboard=(xsel --clipboard --input)
+    elif type xclip >&/dev/null; then
+        write_clipboard=(xclip -selection clipboard)
+    else
+        die "Could not figure out how to write to clipboard."
+    fi
+
+    xscpu64 -warp -8 "$image" -keybuf $'load"tmp",8,1\nsys32768\n' >&/dev/null &
+    local vice_pid=$!
+    printf 'Wait for TMP to load and start in the VICE window, then:\n'
+    for file in "$@"; do
+        "${write_clipboard[@]}" <<<"_l$file"$'\r'
+        printf 'Paste into VICE to load "%s", then press return here.\n' "$1"
+        read
+        "${write_clipboard[@]}" <<<"_w$file.s"$'\r'
+        printf 'Paste into VICE to write "%s.s", then press return here.\n' "$1"
+        read
+    done
+    printf 'Exit VICE\n'
+    wait $vice_pid
+    for file in "$@"; do
+        c1541 "$image" -read "$file.s,s" "$temp/$file.s"
+        petcat -text -o "$file.txt" "$temp/$file.s"
+        echo "$file.txt"
+    done
+}
+
+warn() {
+    printf >&2 '%s: %s\n' "$0" "$(printf "$@")"
+}
+
+die() {
+    warn "$@" 
+    exit 1
+}
+
+main "$@"
