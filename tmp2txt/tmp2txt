@@ -44,10 +44,10 @@ main() {
     printf 'Wait for TMP to load and start in the VICE window, then:\n'
     for file in "$@"; do
         "${write_clipboard[@]}" <<<"_l$file"$'\r'
-        printf 'Paste into VICE to load "%s", then press return here.\n' "$1"
+        printf 'Paste into VICE to load "%s", then press return here.\n' "$file"
         read
         "${write_clipboard[@]}" <<<"_w$file.s"$'\r'
-        printf 'Paste into VICE to write "%s.s", then press return here.\n' "$1"
+        printf 'Paste into VICE to write "%s.s", then press return here.\n' "$file"
         read
     done
     printf 'Exit VICE\n'
